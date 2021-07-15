@@ -103,17 +103,6 @@ class Skammtimaverd:
                          index=False)
         writer.save()
         writer.close()
-        # with pd.ExcelWriter(dest_file,
-        #                     engine='openpyxl',
-        #                     datetime_format=dt_format,
-        #                     mode='a') as writer:
-        #     # startrow = f.sheets['Skammtimaverd'].maw_row
-        #     writer.sheets = dict((ws.title, ws) for ws in writer.worksheets)
-        #     self.df.to_excel(writer,
-        #                      index=False,
-        #                      header=False,
-        #                      startrow=181,
-        #                      sheet_name='Skammtimaverd')
         # TODO APPEND TO AN EXISTING SHEET, NOT A CREATE NEW ONE
 
 
@@ -125,80 +114,3 @@ if __name__ == '__main__':
         # skamm.write_xlsx()
         # skamm.write_csv()
         # mysql_data_manipulation()
-    
-    # def mysql_data_manipulation():
-    #     if this_computer == "LAP-GUNNAR.hsorka.local":
-    #         mydb = mysql.connector.connect(host="LAP-GUNNAR",
-    #                                        user="gunnarth",
-    #                                        passwd="Columbia.2020",
-    #                                        database="LV_Skammtimaverd")
-    #     elif this_computer == "HSOMSADFS01.hsorka.local":
-    #         mydb = mysql.connector.connect(host="HSOMSADFS01",
-    #                                        user="gunnarth",
-    #                                        passwd="Columbia.2020",
-    #                                        database="LV_Skammtimaverd")
-    #     mycursor = mydb.cursor()  # Naudsynleg skipun
-    #     #  mycursor.execute("TRUNCATE TABLE Skammtimaverd") 
-    # # Eydir ollum gognum ur toflunni. Hafa commentad ollu jofnu
-
-    #     # thessi blokk les inn nyjustu gognin i mySQL-toflunni og ber
-    # saman vid gognin i nyjasta skjalinu
-    #     # Ath ad hun virkar bara thegar gogn eru fyrir i toflunni. Fyri
-    #  nyja toflu tharf ad nota blokkina fyrir nedan
-    #     mycursor.execute("SELECT datetime, skammtimaverd FROM Skammtimaverd")
-    #     # Nyjasta dt_str'id i toflunni (ath indexid; [-1]->Sidasta (nyjasta)
-    # linan i toflunni. [0]->Fyrsta gildid (dt_str))
-    #     old_dt_str = mycursor.fetchall()[-1][0]
-    #     old_dt = datetime.strptime(str(old_dt_str),
-    #                                r'%d.%m.%Y %H:%M')
-    #     dt = []
-    #     for i in range(len(dt_str)):
-    #         dt = datetime.strptime(str(dt_str[i]),
-    #                                r'%d.%m.%Y %H:%M')  # Breytum i-ta
-    # gildinu i dt ur str i datetime svo ad vid getum borid thad saman vid
-    # gognin i mySQL
-    #         if dt > old_dt:
-    #             dt_mySQL = dt_str[i:]
-    #             skammtimaverd_mySQL = skammtimaverd[i:]
-
-    #             #  thessi blokk skrifar gogn i LV_Skammtimaverd-tofluna
-    #             sql = "INSERT INTO Skammtimaverd (Datetime,Skammtimaverd)
-    # VALUES (%s,%s)"
-    #             val = []
-    #             for i in range(0, len(skammtimaverd_mySQL)):
-    #                 val = (str(dt_mySQL[i]), str(skammtimaverd_mySQL[i]))
-    #                 mycursor.execute(sql, val)
-    #                 mydb.commit()  # Naudsynleg skipun - framkvaemir sjalfan
-    # innslattinn
-    #                 # Til ad 'skammtimaverd' se number i Excel, ekki text
-    #                 mycursor.execute(
-    #                     "ALTER TABLE Skammtimaverd MODIFY Skammtimaverd
-    # DOUBLE")
-    #                 break  # Hoppum ut ur luppunni
-
-    #   #  thessi blokk skrifar gogn i LV_Skammtimaverd-tofluna. Bara nota 
-    # hessa blokk thegar stora blokkin ad ofan er kommentud
-    #  sql="INSERT INTO Skammtimaverd (Datetime,Skammtimaverd) VALUES (%s,%s)"
-    #  val=[]
-    #  for i in range(0,len(skammtimaverd)):
-    #    val=(str(dt_str[i]),str(skammtimaverd[i]))
-    #    mycursor.execute(sql,val)
-    #    mydb.commit()  # Naudsynleg skipun - framkvaemir sjalfan innslattinn
-    #  mycursor.execute("ALTER TABLE Skammtimaverd MODIFY Skammtimaverd
-    # DOUBLE")  # Til ad 'skammtimaverd' se number i Excel, ekki text
-
-    # AUKALiNUR FYRIR TRAKTERINGAR a MYSQL, EKKI HENDA
-    #  mycursor.execute("CREATE DATABASE LV_Skammtimaverd")   # Bua til nyjan
-    # gagnagrunn
-    #   #  sql="DROP TABLE skammtimaverd"  # Eyda toflu
-    #  mydb.commit()
-    #   #  mycursor.execute("DROP TABLE skammtimaverd")  # Eydir toflunni
-    #  mycursor.execute("CREATE TABLE Skammtimaverd (Datetime VARCHAR(255),
-    # Skammtimaverd VARCHAR(255))")  # Bua til nyja toflu
-    #  mycursor.execute("ALTER TABLE Skammtimaverd ADD COLUMN id INT
-    # AUTO_INCREMENT PRIMARY KEY")  # SKYLDA: Baetir vid unique ID fyrir
-    # hverja linu i toflunni
-
-#####################################################
-# Naestu skref:
-# 2. Tengja mySQL vid Masterskjal
