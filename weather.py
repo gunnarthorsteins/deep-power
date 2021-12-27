@@ -1,21 +1,15 @@
 import socket
+import requests
 import traceback
 import pandas as pd
+
 from datetime import datetime
 
 import mysql.connector
 from bs4 import BeautifulSoup
 
-import taskkiller
-import wind
-import Logs
-from browser import LaunchFirefox
+import config
 
-
-stations = {'Grindavík': 1361,
-            'Vestmannaeyjar': 6015,
-            'Hafnarfjörður': 31475,
-            'Keflavík': 990}
 
 
 class Forecast:
@@ -39,10 +33,11 @@ class Forecast:
     """
 
     def __init__(self):
-        self.t_of_run = datetime.strftime(datetime.now(),
-                                          r'%Y-%m-%d %H:%M:%S')
-        driver = LaunchFirefox(headless=True)
-        self.driver = driver()
+        pass
+        # self.t_of_run = datetime.strftime(datetime.now(),
+        #                                   r'%Y-%m-%d %H:%M:%S')
+        # driver = LaunchFirefox(headless=True)
+        # self.driver = driver()
 
     def __enter__(self):
         return self
@@ -51,9 +46,8 @@ class Forecast:
         if exc:
             Logs.log(name=weather.__class__.__name__,
                      msg=traceback.format_exc(limit=1),
-                     loglvl='WARNING')
-        procs = ['firefox', 'geckodriver']
-        taskkiller.kill(procs)
+                     loglvl='INFO')
+        # procs = ['firefox', 'geckodriver']
 
     def scrape_data(self, station):
         """Utilizes the BeautifulSoup module for the scraping.
@@ -61,12 +55,24 @@ class Forecast:
         Parameters:
             station (int): The station code (not the station name)
         """
-
         url = (f'https://xmlweather.vedur.is/?op_w=xml&'
                f'type=forec&lang=en&view=xml&ids='
                f'{str(station)}&params=F;D;T;N;R&time=1h')
-        self.driver.get(url)
-        soup = BeautifulSoup(self.driver.page_source, 'lxml')
+
+        r = requests.get(url, stream=True)              #request page as stream
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.content, 'html.parser')
+            print(soup.prettify())
+                        #check status of request
+            # with open(filename, 'wb') as f:             #create image file
+            #     for chunk in r.iter_content(1024):      #write image to file in chunks
+            #         f.write(chunk)
+
+        # url = (f'https://xmlweather.vedur.is/?op_w=xml&'
+        #        f'type=forec&lang=en&view=xml&ids='
+        #        f'{str(station)}&params=F;D;T;N;R&time=1h')
+        # self.driver.get(url)
+        # soup = BeautifulSoup(self.driver.page_source, 'lxml')
 
         return soup
 
@@ -77,9 +83,6 @@ class Forecast:
             soup (Beautiful Soup) from The Met's XML-service
             station (str): The station name (not the station code)
         """
-        args = ['ftime', 'f', 'd', 't', 'n', 'r']
-        keys = ['t_of_run', 'dt', 'station', 'wind_a',
-                'wind_d', 'T', 'cl_co', 'rain']
         vals = []
         for arg in args:
             item = [i.get_text() for i in soup.find_all(arg)]
@@ -157,23 +160,3 @@ if __name__ == '__main__':
             df = weather.format_data(soup, key)
             weather.append_csv(df)
             # weather.write_mySQL()
-
-
-# # Extra lines for MySQL, do not remove
-# Create a new databaste
-# # mycursor.execute('CREATE DATABASE LV_Skammtimaverd')
-# # # sql='DROP TABLE skammtimaverd' #Eyda toflu
-# # mydb.commit()
-# Removes all data from table
-# # mycursor.execute('TRUNCATE TABLE Skammtimaverd')
-# Deletes table
-# # mycursor.execute('DROP TABLE Weather_Data')
-# Create a new table
-# # mycursor.execute('CREATE TABLE Weather_Data
-#           (DT_Run_Time VARCHAR(255), Datetime VARCHAR(255),
-#           Station VARCHAR(255), wind_a VARCHAR(255),
-#           wind_d VARCHAR(255), Temperature VARCHAR(255)
-#            Cloud_Cover VARCHAR(255), Rain VARCHAR(255))')
- #Necessary: Adds a unique ID for every line in table
-# # mycursor.execute('ALTER TABLE Weather_Data ADD COLUMN id INT
-#                   AUTO_INCREMENT PRIMARY KEY')

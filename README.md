@@ -1,5 +1,5 @@
 # deep-power
 
-An all-round workhorse that scrapes open-source data from Landsnet about current power and regulation value in the transmission system.
+A minimalistic framework for scraping open-source data from Landsnet (Icelandic ISO) about current power and regulation value in the transmission system. It also scrapes weather data from the Icelandic MET.
 
-More to come...
+Am constantly running this on a server as these values are transient and hard to get retrospectively. They must be collected in real-time.
