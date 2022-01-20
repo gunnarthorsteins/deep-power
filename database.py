@@ -23,17 +23,16 @@ class Setup():
 
 
 class Create(Setup):
-    """Sets up the SQL schema"""
+    """Sets up the SQL schema.
+    Am not including a db-generator because I prefer doing it terminal.
+    """
 
     def __init__(self):
         super().__init__()
 
-    def create_db(self):
-        pass
-
     def create_table(self, name: str, command: tuple):
         """Creates a table in MySQL database
-        
+
         Params:
             name: table name
             command: Cannot be bothered making more lower level.

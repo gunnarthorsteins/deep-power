@@ -1,0 +1,74 @@
+Retrying.
+
+--2021-12-26 20:07:13--  (try: 3)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:09:27--  (try: 4)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:11:41--  (try: 5)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:13:57--  (try: 6)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:16:13--  (try: 7)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:18:29--  (try: 8)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:20:48--  (try: 9)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:23:06--  (try:10)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:25:26--  (try:11)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:27:45--  (try:12)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:30:05--  (try:13)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:32:24--  (try:14)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:34:43--  (try:15)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:37:02--  (try:16)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:39:22--  (try:17)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:41:41--  (try:18)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:44:00--  (try:19)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Retrying.
+
+--2021-12-26 20:46:19--  (try:20)  https://amper.landsnet.is/MapData/api/measurements:22
+Connecting to amper.landsnet.is (amper.landsnet.is)|193.4.61.119|:443... failed: Connection timed out.
+Giving up.
+

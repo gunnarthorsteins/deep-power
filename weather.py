@@ -1,137 +1,107 @@
-import socket
+import json
 import requests
-import traceback
+import logging
 import pandas as pd
-
+import traceback
 from datetime import datetime
-
-import mysql.connector
 from bs4 import BeautifulSoup
 
-import config
-
+import database
 
 
 class Forecast:
-    """Scrapes meteorological data from The Met's XML-service
-    and saves to a csv (for Power BI) and mySQL.
+    """Scrapes meteorological data from The Met's XML-service,
+    formats, and finally saves to a sql database.
 
-    Usage:
-        weather = Forecast()
-        for key, val in stations.items():
-            soup = weather.scrape_data(val)
-            df = weather.format_data(soup, key)
-            weather.append_csv(df)
-            weather.write_mySQL()
+    List of station codes:
+    https://www.vedur.is/vedur/stodvar
 
-    Note:
-        List of station codes is here:
-        https://www.vedur.is/vedur/stodvar
-
-        XML-service docs for additional query parameters:
-        https://www.vedur.is/media/vedurstofan/XMLthjonusta.pdf
+    XML-service docs for additional query parameters:
+    https://www.vedur.is/media/vedurstofan/XMLthjonusta.pdf
     """
 
     def __init__(self):
-        pass
-        # self.t_of_run = datetime.strftime(datetime.now(),
-        #                                   r'%Y-%m-%d %H:%M:%S')
-        # driver = LaunchFirefox(headless=True)
-        # self.driver = driver()
+        logging.basicConfig(filename='logs.log',
+                            level=logging.INFO,
+                            format='%(asctime)s %(message)s')
 
-    def __enter__(self):
-        return self
+        with open('config.json') as f:
+            self.config = json.load(f)
 
-    def __exit__(self, exc, exc_val, exc_tb):
-        if exc:
-            Logs.log(name=weather.__class__.__name__,
-                     msg=traceback.format_exc(limit=1),
-                     loglvl='INFO')
-        # procs = ['firefox', 'geckodriver']
+    def scrape(self):
+        """Scrapes weather forecasts from Icelandic Met.
 
-    def scrape_data(self, station):
-        """Utilizes the BeautifulSoup module for the scraping.
-
-        Parameters:
-            station (int): The station code (not the station name)
-        """
-        url = (f'https://xmlweather.vedur.is/?op_w=xml&'
-               f'type=forec&lang=en&view=xml&ids='
-               f'{str(station)}&params=F;D;T;N;R&time=1h')
-
-        r = requests.get(url, stream=True)              #request page as stream
-        if r.status_code == 200:
-            soup = BeautifulSoup(r.content, 'html.parser')
-            print(soup.prettify())
-                        #check status of request
-            # with open(filename, 'wb') as f:             #create image file
-            #     for chunk in r.iter_content(1024):      #write image to file in chunks
-            #         f.write(chunk)
-
-        # url = (f'https://xmlweather.vedur.is/?op_w=xml&'
-        #        f'type=forec&lang=en&view=xml&ids='
-        #        f'{str(station)}&params=F;D;T;N;R&time=1h')
-        # self.driver.get(url)
-        # soup = BeautifulSoup(self.driver.page_source, 'lxml')
-
-        return soup
-
-    def format_data(self, soup, station):
-        """Manipulates the scraped data and writes to a pandas dataframe.
-
-        Parameters:
-            soup (Beautiful Soup) from The Met's XML-service
-            station (str): The station name (not the station code)
-        """
-        vals = []
-        for arg in args:
-            item = [i.get_text() for i in soup.find_all(arg)]
-            vals.append(item)
-        vals.insert(0, self.t_of_run)
-        vals.insert(2, station)
-        data = dict(zip(keys, vals))
-
-        # Some additional formatting is needed for several variables
-        dt_fmt = r'%Y-%m-%d %H:%M:%S'
-        data['dt'] = [datetime.strptime(i, dt_fmt) for i in data['dt']]
-        data['T'] = [int(i) for i in data['T']]
-        data['cl_co'] = [round(0.01*int(i), 2) for i in data['cl_co']]
-        # Agaleg lúppa, en næ ekki að stilla upp list comprehension f me sideways
-        wind_d = []
-        for item in data['wind_d']:
-            for key, val in wind.wind.items():
-                if item == key:
-                    wind_d.append(val)
-                    break
-        data['wind_d'] = wind_d
-
-        return pd.DataFrame(data)
-
-    def append_csv(self, df):
-        """Writes the meteorological data to a csv.
-
-        Parameters:
-            df (pd.dataframe)
-
-        Note:
-            encoding='latin1' is for accent letters
+        Stations and parameters configured in config.json
         """
 
-        df.to_csv('weather.csv',
-                  mode='a',
-                  header=False,
-                  sep='\t',
-                  index=False,
-                  encoding='latin1')
+        stations = self.config['met']['stations']
+        url_prefix = self.config['met']['url_prefix']
+        url_appendix = self.config['met']['url_appendix']
+        forecasts = dict()
+        for name, id in stations.items():
+            url = f'{url_prefix}{id}{url_appendix}'
+            r = requests.get(url, stream=True)
+            if r.status_code == 200:
+                soup = BeautifulSoup(r.content, 'html.parser')
+                forecasts[name] = soup
+        return forecasts
 
-    def write_mySQL(self, station):
-        this_computer = socket.getfqdn()
+    def parse(self, raw_data: dict):
+        """Parses the raw, scraped data.
 
-        assert this_computer == 'HSOMSADFS01.hsorka.local'
-        mydb = mysql.connector.connect(host='HSOMSADFS01',
-                                       user='gunnarth',
-                                       passwd='Columbia.2020',
-                                       database='LV_Skammtimaverd')
+        Args:
+            scraped_data (dict): The scraped data. Keys are station names,
+                                 vals are the XML files
+
+        Returns:
+            formatted_data (pd.DataFrame): A relational-database-style
+                                           version of the scraped data. 
+        """
+
+        parameters = self.config['met']['parameters']
+        nonrelational_data = dict()
+        # all_forecasts = pd.DataFrame(columns=parameters.keys())
+        for station_names, data_by_station in raw_data.items():
+            print(pd.read_xml(data_by_station))
+            # nonrelational_data[station_names] =
+            # for parameter in parameters.values():
+            #     for tag in data_by_station.find_all(parameter):
+            #         # nonrelational_data[]
+            #         # sequence = data.find_all(feature)
+            #         # print(tag.string)
+            #         pass
+            break
+        # vals = []
+        # for arg in args:
+        #     item = [i.get_text() for i in soup.find_all(arg)]
+        #     vals.append(item)
+        # vals.insert(0, self.t_of_run)
+        # vals.insert(2, station)
+        # data = dict(zip(keys, vals))
+
+        # # Some additional formatting is needed for several variables
+        # dt_fmt = r'%Y-%m-%d %H:%M:%S'
+        # data['dt'] = [datetime.strptime(i, dt_fmt) for i in data['dt']]
+        # data['T'] = [int(i) for i in data['T']]
+        # data['cl_co'] = [round(0.01*int(i), 2) for i in data['cl_co']]
+        # # Agaleg lúppa, en næ ekki að stilla upp list comprehension f me sideways
+        # wind_d = []
+        # for item in data['wind_d']:
+        #     for key, val in wind.wind.items():
+        #         if item == key:
+        #             wind_d.append(val)
+        #             break
+        # data['wind_d'] = wind_d
+
+        # return pd.DataFrame(data)
+
+    def write(self, station):
+        """[summary]
+
+        Args:
+            station ([type]): [description]
+        """
+
         mycursor = mydb.cursor()  # Naudsynleg skipun
 
         # Skrifum gogn i Weather_Data-tofluna
@@ -152,11 +122,14 @@ class Forecast:
             mydb.commit()  # Nauðsynleg skipun - framkvæmir sjálfan innsláttinn
 
 
+def main():
+    try:
+        weather = Forecast()
+        raw_data = weather.scrape()
+        formatted_data = weather.parse(raw_data)
+    except:
+        logging.error(traceback.format_exc())
+
+
 if __name__ == '__main__':
-    w = Forecast()
-    with w as weather:
-        for key, val in stations.items():
-            soup = weather.scrape_data(val)
-            df = weather.format_data(soup, key)
-            weather.append_csv(df)
-            # weather.write_mySQL()
+    main()
