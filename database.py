@@ -24,7 +24,7 @@ class Setup():
 
 class Create(Setup):
     """Sets up the SQL schema.
-    Am not including a db-generator because I prefer doing it terminal.
+    Am not including a db-generator because I prefer doing it in terminal.
     """
 
     def __init__(self):

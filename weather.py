@@ -1,3 +1,5 @@
+from lib2to3.pgen2.pgen import DFAState
+import fire
 import json
 import requests
 import logging
@@ -10,8 +12,10 @@ import database
 
 
 class Forecast:
-    """Scrapes meteorological data from The Met's XML-service,
-    formats, and finally saves to a sql database.
+    """Scrapes meteorological forecasts.
+
+    Scrapes weather forecasts from The Met's XML-service,
+    formats, and finally saves to a SQL database.
 
     List of station codes:
     https://www.vedur.is/vedur/stodvar
@@ -44,6 +48,7 @@ class Forecast:
             if r.status_code == 200:
                 soup = BeautifulSoup(r.content, 'html.parser')
                 forecasts[name] = soup
+
         return forecasts
 
     def parse(self, raw_data: dict):
@@ -51,85 +56,50 @@ class Forecast:
 
         Args:
             scraped_data (dict): The scraped data. Keys are station names,
-                                 vals are the XML files
+                vals are the XML files
 
         Returns:
             formatted_data (pd.DataFrame): A relational-database-style
-                                           version of the scraped data. 
+                version of the scraped data. 
         """
 
         parameters = self.config['met']['parameters']
-        nonrelational_data = dict()
-        # all_forecasts = pd.DataFrame(columns=parameters.keys())
-        for station_names, data_by_station in raw_data.items():
-            print(pd.read_xml(data_by_station))
-            # nonrelational_data[station_names] =
-            # for parameter in parameters.values():
-            #     for tag in data_by_station.find_all(parameter):
-            #         # nonrelational_data[]
-            #         # sequence = data.find_all(feature)
-            #         # print(tag.string)
-            #         pass
-            break
-        # vals = []
-        # for arg in args:
-        #     item = [i.get_text() for i in soup.find_all(arg)]
-        #     vals.append(item)
-        # vals.insert(0, self.t_of_run)
-        # vals.insert(2, station)
-        # data = dict(zip(keys, vals))
+        all_data = []
+        for station_name, data_by_station in raw_data.items():
+            NO_TIMESTEPS = len(data_by_station.find_all("ftime"))
+            parsed_data_by_station = []
+            column_headers = []
+            for parameter in parameters.values():
+                column_headers.append(parameter)
+                if parameter == 'atime':
+                    atime = data_by_station.find(parameter)
+                    parsed_data_by_station.append([atime.text] * NO_TIMESTEPS)
+                elif parameter == 'station':
+                    parsed_data_by_station.append(
+                        [station_name] * NO_TIMESTEPS)
+                else:
+                    data_points_by_parameter = []
+                    for data_point in data_by_station.find_all(parameter):
+                        data_points_by_parameter.append(data_point.text)
+                    parsed_data_by_station.append(data_points_by_parameter)
+            parsed_data = list(zip(*parsed_data_by_station))
+            all_data.append(pd.DataFrame(parsed_data, columns=column_headers))
 
-        # # Some additional formatting is needed for several variables
-        # dt_fmt = r'%Y-%m-%d %H:%M:%S'
-        # data['dt'] = [datetime.strptime(i, dt_fmt) for i in data['dt']]
-        # data['T'] = [int(i) for i in data['T']]
-        # data['cl_co'] = [round(0.01*int(i), 2) for i in data['cl_co']]
-        # # Agaleg lúppa, en næ ekki að stilla upp list comprehension f me sideways
-        # wind_d = []
-        # for item in data['wind_d']:
-        #     for key, val in wind.wind.items():
-        #         if item == key:
-        #             wind_d.append(val)
-        #             break
-        # data['wind_d'] = wind_d
+        return pd.concat(all_data, ignore_index=True)
 
-        # return pd.DataFrame(data)
-
-    def write(self, station):
-        """[summary]
-
-        Args:
-            station ([type]): [description]
-        """
-
-        mycursor = mydb.cursor()  # Naudsynleg skipun
-
-        # Skrifum gogn i Weather_Data-tofluna
-        sql = ('INSERT INTO Weather_Data (DT_Run_Time,Datetime,Station,'
-               'wind_a,wind_d,Temperature,Cloud_Cover,Rain)'
-               'VALUES (%s,%s,%s,%s,%s,%s,%s,%s)')
-        val = []
-        for j in range(len(self.dt)):
-            val = (self.t,
-                   self.dt[j],
-                   station,
-                   self.wind_a[j],
-                   self.wind_d[j],
-                   self.T[j],
-                   self.cloud_cover[j],
-                   self.rain[j])
-            mycursor.execute(sql, val)
-            mydb.commit()  # Nauðsynleg skipun - framkvæmir sjálfan innsláttinn
+    def save(self, data):
+        sql = database.SQL()
+        sql.write(data)
 
 
 def main():
-    try:
-        weather = Forecast()
-        raw_data = weather.scrape()
-        formatted_data = weather.parse(raw_data)
-    except:
-        logging.error(traceback.format_exc())
+    # try:
+    weather = Forecast()
+    raw_data = weather.scrape()
+    formatted_data = weather.parse(raw_data)
+    # except:
+    #     logging.error(traceback.format_exc())
 
 
 if __name__ == '__main__':
-    main()
+    fire.Fire(main)
