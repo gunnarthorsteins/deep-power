@@ -53,7 +53,7 @@ class SQL(Setup):
             logging.error('Unsuccessful in connecting to database')
             raise Error
 
-    def write(self, table: str, data: list):
+    def write(self, table: str, data: list, columns, types):
         '''Writes data to MySQL table.
         Params:
             table: table name
@@ -61,9 +61,9 @@ class SQL(Setup):
         '''
 
         # Setup
-        columns = ','.join(self.config['columns'])  # Formatting column names
-        types = str(len(self.config['columns']) *
-                    f'%s,')[:-1]  # Formatting value types
+        # columns = ','.join(self.config['columns'])  # Formatting column names
+        # types = str(len(self.config['columns']) *
+        #             f'%s,')[:-1]  # Formatting value types
         command = (f'INSERT INTO {table} ({columns}) VALUES ({types})')
 
         # Execution

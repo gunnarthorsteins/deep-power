@@ -45,9 +45,10 @@ class Forecast:
         for name, id in stations.items():
             url = f'{url_prefix}{id}{url_appendix}'
             r = requests.get(url, stream=True)
-            if r.status_code == 200:
-                soup = BeautifulSoup(r.content, 'html.parser')
-                forecasts[name] = soup
+            if r.status_code != 200:
+                raise requests.exceptions.Timeout
+            soup = BeautifulSoup(r.content, 'html.parser')
+            forecasts[name] = soup
 
         return forecasts
 
@@ -69,7 +70,7 @@ class Forecast:
             NO_TIMESTEPS = len(data_by_station.find_all("ftime"))
             parsed_data_by_station = []
             column_headers = []
-            for parameter in parameters.values():
+            for parameter in parameters:
                 column_headers.append(parameter)
                 if parameter == 'atime':
                     atime = data_by_station.find(parameter)
@@ -87,9 +88,26 @@ class Forecast:
 
         return pd.concat(all_data, ignore_index=True)
 
-    def save(self, data):
-        sql = database.SQL()
-        sql.write(data)
+    def convert_wind_direction(self, parsed_data: pd.DataFrame):
+        directions = self.config['wind_directions']
+        for str_, val in directions.items():
+            parsed_data.replace(to_replace=str_, value=val, inplace=True)
+
+        return parsed_data
+
+    def get_db_columns(self):
+        parameters = self.config['met']['parameters']
+        columns = [(parameter) for parameter in parameters.items()]
+        
+        return columns
+
+    def get_db_types(self):
+        parameters = self.config['met']['parameters']
+        types = ''
+        for parameter in parameters.values():
+            types = f'{types}%{parameter}'
+
+        return types
 
 
 def main():
@@ -97,6 +115,12 @@ def main():
     weather = Forecast()
     raw_data = weather.scrape()
     formatted_data = weather.parse(raw_data)
+    finalized_data = weather.convert_wind_direction(formatted_data)
+    columns = weather.get_db_columns()
+    types = weather.get_db_types()
+    sql = database.SQL()
+    sql.write(table='weather', data=finalized_data,
+              columns=columns, types=types)
     # except:
     #     logging.error(traceback.format_exc())
 

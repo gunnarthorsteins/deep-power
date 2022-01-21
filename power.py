@@ -1,3 +1,4 @@
+import fire
 from datetime import datetime
 import traceback
 import logging
@@ -82,4 +83,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)
