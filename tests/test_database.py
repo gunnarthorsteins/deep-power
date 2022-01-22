@@ -6,9 +6,12 @@ import unittest
 pwd = os.getcwd()
 sys.path.insert(0, pwd)
 
+from database import SQL
+
 class TestDatabase(unittest.TestCase):
-    def test_connection(self):
-        pass
+    def test_instance(self):
+        sql = SQL()
+        self.assertIsInstance(sql, SQL)        
 
 if __name__ == "__main__":
     unittest.main()

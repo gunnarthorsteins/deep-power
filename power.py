@@ -37,9 +37,9 @@ class Landsnet:
         """
         URL = self.config['landsnet']['URL']
         page = requests.get(URL)
-        self.soup = BeautifulSoup(page.text, 'lxml')
-        print(self.soup.prettify())
+        soup = BeautifulSoup(page.text, 'lxml')
 
+        
         # reglun = self.get_from_soup('reglun')
         # dt = self.get_from_soup('dt')
         # pwr = self.get_from_soup('pwr')

@@ -49,9 +49,6 @@ class SQL(Setup):
 
     def __init__(self):
         super().__init__()
-        if not self.mydb.is_connected():  # Checking whether connection was successful
-            logging.error('Unsuccessful in connecting to database')
-            raise Error
 
     def write(self, table: str, data: list, NO_COLUMNS: int, is_many=True):
         '''Writes data to MySQL table.

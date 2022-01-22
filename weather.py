@@ -1,11 +1,9 @@
 import bs4
-from bs4 import BeautifulSoup
 import json
 import logging
-import requests
-import traceback
 
 import database
+import scrape
 
 
 class Forecast:
@@ -31,22 +29,6 @@ class Forecast:
 
         self.parameters = self.config['met']['parameters']
 
-    def _get_url(self, station_id: str):
-        """Gets the URL for the MET query.
-
-        Helper function for scrape()
-
-        Args:
-            station_id (str): The station ID (see class description)
-
-        Returns:
-            (str): The URL
-        """        
-        url_prefix = self.config['met']['url_prefix']
-        url_appendix = self.config['met']['url_appendix']
-
-        return f'{url_prefix}{station_id}{url_appendix}'
-
     def _convert_wind_direction(self, direction: str):
         """Converts wind direction from str (SA) to int (135).
 
@@ -57,35 +39,29 @@ class Forecast:
 
         Returns:
             (int): The corresponding wind direction as an int
-        """        
+        """
 
         directions = self.config['wind_directions']
         for direction_str, direction_int in directions.items():
             if direction_str == direction:
                 return direction_int
 
-    def scrape(self, station_id: str):
-        """Scrapes weather forecasts from Icelandic Met.
+    def get_url(self, station_id: str):
+        """Gets the URL for the MET query.
 
-        Stations and parameters configured in config.json.
+        Helper function for scrape()
 
         Args:
             station_id (str): The station ID (see class description)
 
         Returns:
-            (bs4.BeautifulSoup): The query results
-        
-        Raises:
-            requests.exceptions.ConnectionError: If connection isn't made
+            (str): The URL
         """
 
-        url = self._get_url(station_id)
-        r = requests.get(url, stream=True)
-        if r.status_code != 200:
-            # TODO: Raise different requests exception
-            raise requests.exceptions.ConnectionError
+        url_prefix = self.config['met']['url_prefix']
+        url_appendix = self.config['met']['url_appendix']
 
-        return BeautifulSoup(r.content, 'html.parser')
+        return f'{url_prefix}{station_id}{url_appendix}'
 
     def parse(self, station_name: str, raw_data: bs4.BeautifulSoup):
         """Parses the raw, scraped data to desired format for SQL writing.
@@ -132,7 +108,8 @@ def main():
     weather = Forecast()
     sql = database.SQL()
     for station_name, station_id in stations.items():
-        raw_data = weather.scrape(station_id)
+        url = weather.get_url(station_id)
+        raw_data = scrape.scrape(url)
         formatted_data = weather.parse(station_name, raw_data)
         sql.write(table='weather', data=formatted_data, NO_COLUMNS=8)
 
