@@ -95,8 +95,8 @@ class Forecast:
             raw_data (bs4.BeautifulSoup): The query result
 
         Returns:
-            formatted_data (pd.DataFrame): A relational-database-style
-                version of the scraped data. 
+            (list): Nested tuples in a list with the formatted
+                query results
         """
 
         NO_TIMESTEPS = len(raw_data.find_all("ftime"))

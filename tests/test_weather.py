@@ -4,13 +4,8 @@ import sys
 pwd = os.getcwd()
 sys.path.insert(0, pwd)
 
-
 from weather import Forecast
 import unittest
-
-
-stations_validation = ['Grindavík',
-                       "Vestmannaeyjar", "Hafnarfjörður", "Keflavík"]
 
 
 class TestWeather(unittest.TestCase):
@@ -20,17 +15,14 @@ class TestWeather(unittest.TestCase):
 
     def test_scrape(self):
         forecast_ = Forecast()
-        self.forecasts = forecast_.scrape()
-        for i, (station, soup) in enumerate(self.forecasts.items()):
-            self.assertEqual(station, stations_validation[i])
-            self.assertIsNotNone(soup)
+        soup = forecast_.scrape(station_id=1361)
+        self.assertIsNotNone(soup)
 
-    # def test_parse(self):
-        # formatted_forecasts = forecast_.parse(self.forecasts)
-        # self.assert
-
-    def test_write_to_db(self):
-        pass
+    def test_parse(self):
+        forecast_ = Forecast()
+        soup = forecast_.scrape(station_id=1361)
+        formatted_forecasts = forecast_.parse(station_name='Grindavík', raw_data=soup)
+        self.assertIsNotNone(formatted_forecasts)
 
 
 if __name__ == "__main__":
