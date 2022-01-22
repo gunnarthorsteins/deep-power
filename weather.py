@@ -1,12 +1,10 @@
-from lib2to3.pgen2.pgen import DFAState
+import bs4
+from bs4 import BeautifulSoup
 import fire
 import json
-import requests
 import logging
-import pandas as pd
+import requests
 import traceback
-from datetime import datetime
-from bs4 import BeautifulSoup
 
 import database
 
@@ -32,27 +30,29 @@ class Forecast:
         with open('config.json') as f:
             self.config = json.load(f)
 
-    def scrape(self):
+        self.parameters = self.config['met']['parameters']
+
+    def _set_url(self, station_id: str):
+        url_prefix = self.config['met']['url_prefix']
+        url_appendix = self.config['met']['url_appendix']
+
+        return f'{url_prefix}{station_id}{url_appendix}'
+
+    def scrape(self, station_id: str):
         """Scrapes weather forecasts from Icelandic Met.
 
         Stations and parameters configured in config.json
         """
 
-        stations = self.config['met']['stations']
-        url_prefix = self.config['met']['url_prefix']
-        url_appendix = self.config['met']['url_appendix']
-        forecasts = dict()
-        for name, id in stations.items():
-            url = f'{url_prefix}{id}{url_appendix}'
-            r = requests.get(url, stream=True)
-            if r.status_code != 200:
-                raise requests.exceptions.Timeout
-            soup = BeautifulSoup(r.content, 'html.parser')
-            forecasts[name] = soup
+        url = self._set_url(station_id)
+        r = requests.get(url, stream=True)
+        if r.status_code != 200:
+            # TODO: Raise different requests exception
+            raise requests.exceptions.Timeout
 
-        return forecasts
+        return BeautifulSoup(r.content, 'html.parser')
 
-    def parse(self, raw_data: dict):
+    def parse(self, station_name: str, raw_data: bs4.BeautifulSoup):
         """Parses the raw, scraped data.
 
         Args:
@@ -64,63 +64,49 @@ class Forecast:
                 version of the scraped data. 
         """
 
-        parameters = self.config['met']['parameters']
-        all_data = []
-        for station_name, data_by_station in raw_data.items():
-            NO_TIMESTEPS = len(data_by_station.find_all("ftime"))
-            parsed_data_by_station = []
-            column_headers = []
-            for parameter in parameters:
-                column_headers.append(parameter)
-                if parameter == 'atime':
-                    atime = data_by_station.find(parameter)
-                    parsed_data_by_station.append([atime.text] * NO_TIMESTEPS)
-                elif parameter == 'station':
-                    parsed_data_by_station.append(
-                        [station_name] * NO_TIMESTEPS)
-                else:
-                    data_points_by_parameter = []
-                    for data_point in data_by_station.find_all(parameter):
+        NO_TIMESTEPS = len(raw_data.find_all("ftime"))
+        parsed_data_by_station = []
+        column_headers = []
+        for parameter in self.parameters:
+            column_headers.append(parameter)
+            if parameter == 'atime':
+                atime = raw_data.find(parameter)
+                parsed_data_by_station.append([atime.text] * NO_TIMESTEPS)
+            elif parameter == 'station':
+                parsed_data_by_station.append(
+                    [station_name] * NO_TIMESTEPS)
+            else:
+                data_points_by_parameter = []
+                for data_point in raw_data.find_all(parameter):
+                    if parameter == 'd':
+                        direction = self._convert_wind_direction(
+                            data_point.text)
+                        data_points_by_parameter.append(direction)
+                    else:
                         data_points_by_parameter.append(data_point.text)
-                    parsed_data_by_station.append(data_points_by_parameter)
-            parsed_data = list(zip(*parsed_data_by_station))
-            all_data.append(pd.DataFrame(parsed_data, columns=column_headers))
-
-        return pd.concat(all_data, ignore_index=True)
-
-    def convert_wind_direction(self, parsed_data: pd.DataFrame):
-        directions = self.config['wind_directions']
-        for str_, val in directions.items():
-            parsed_data.replace(to_replace=str_, value=val, inplace=True)
+                parsed_data_by_station.append(data_points_by_parameter)
+        parsed_data = list(zip(*parsed_data_by_station))
 
         return parsed_data
 
-    def get_db_columns(self):
-        parameters = self.config['met']['parameters']
-        columns = [(parameter) for parameter in parameters.items()]
-        
-        return columns
-
-    def get_db_types(self):
-        parameters = self.config['met']['parameters']
-        types = ''
-        for parameter in parameters.values():
-            types = f'{types}%{parameter}'
-
-        return types
+    def _convert_wind_direction(self, direction: str):
+        directions = self.config['wind_directions']
+        for str_, val in directions.items():
+            if str_ == direction:
+                return val
 
 
 def main():
     # try:
+    with open('config.json') as f:
+        config = json.load(f)
+    stations = config["met"]["stations"]
     weather = Forecast()
-    raw_data = weather.scrape()
-    formatted_data = weather.parse(raw_data)
-    finalized_data = weather.convert_wind_direction(formatted_data)
-    columns = weather.get_db_columns()
-    types = weather.get_db_types()
     sql = database.SQL()
-    sql.write(table='weather', data=finalized_data,
-              columns=columns, types=types)
+    for station_name, station_id in stations.items():
+        raw_data = weather.scrape(station_id)
+        formatted_data = weather.parse(station_name, raw_data)
+        sql.write(table='weather', data=formatted_data, NO_COLUMNS=8)
     # except:
     #     logging.error(traceback.format_exc())
 

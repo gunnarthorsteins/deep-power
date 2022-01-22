@@ -16,10 +16,10 @@ class Setup():
         f = open('config.json')
         self.config = json.load(f)
 
-        self.mydb = mysql.connector.connect(host=self.config['HOST'],
-                                            user=self.config['USER'],
-                                            passwd=self.config['PASSWD'],
-                                            database=self.config['DATABASE'])
+        self.mydb = mysql.connector.connect(host=self.config['sql']['HOST'],
+                                            user=self.config['sql']['USER'],
+                                            passwd=self.config['sql']['PASSWD'],
+                                            database=self.config['sql']['DATABASE'])
 
 
 class Create(Setup):
@@ -33,7 +33,7 @@ class Create(Setup):
     def create_table(self, name: str, command: tuple):
         """Creates a table in MySQL database
 
-        Params:
+        Args:
             name: table name
             command: Cannot be bothered making more lower level.
                      Should be of format (name VARCHAR(50), has_a_big_head BINARY)
@@ -53,23 +53,21 @@ class SQL(Setup):
             logging.error('Unsuccessful in connecting to database')
             raise Error
 
-    def write(self, table: str, data: list, columns, types):
+    def write(self, table: str, data: list, NO_COLUMNS: int):
         '''Writes data to MySQL table.
-        Params:
+        Args:
             table: table name
             data: data to be written out. Format within list shouldn't matter
         '''
 
         # Setup
-        # columns = ','.join(self.config['columns'])  # Formatting column names
-        # types = str(len(self.config['columns']) *
-        #             f'%s,')[:-1]  # Formatting value types
-        command = (f'INSERT INTO {table} ({columns}) VALUES ({types})')
+        types = str(NO_COLUMNS * f'%s,')[:-1]  # Formatting value types
+        command = (f'INSERT INTO {table} VALUES ({types})')
 
         # Execution
         mycursor = self.mydb.cursor()  # A necessary command for every query
-        mycursor.execute(command, tuple(data))
-        self.mydb.commit()
+        mycursor.executemany(command, data)
+        self.mydb.commit()  # A necessary command for every query
         logging.info('Success: Logged to database')
 
     def fetch(self, table, val):
