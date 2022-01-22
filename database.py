@@ -53,11 +53,16 @@ class SQL(Setup):
             logging.error('Unsuccessful in connecting to database')
             raise Error
 
-    def write(self, table: str, data: list, NO_COLUMNS: int):
+    def write(self, table: str, data: list, NO_COLUMNS: int, is_many=True):
         '''Writes data to MySQL table.
+
         Args:
             table: table name
-            data: data to be written out. Format within list shouldn't matter
+            data: data to be written out. Format is list or nested tuples
+                in list if writing multiple lines
+            NO_COLUMNS: Number of columns in table. This is dumb but cannot
+                be bothered with it for now
+            is_many: Whether we're writing multiple lines. Defaults to True
         '''
 
         # Setup
@@ -66,7 +71,10 @@ class SQL(Setup):
 
         # Execution
         mycursor = self.mydb.cursor()  # A necessary command for every query
-        mycursor.executemany(command, data)
+        if is_many:
+            mycursor.executemany(command, data)
+        else:
+            mycursor.execute(command, tuple(data))
         self.mydb.commit()  # A necessary command for every query
         logging.info('Success: Logged to database')
 
