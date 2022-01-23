@@ -3,7 +3,7 @@ import json
 import logging
 
 import database
-import scrape
+from scrape import Scraper
 
 
 class Forecast:
@@ -26,7 +26,6 @@ class Forecast:
 
         with open('config.json') as f:
             self.config = json.load(f)
-
         self.parameters = self.config['met']['parameters']
 
     def _convert_wind_direction(self, direction: str):
@@ -109,7 +108,8 @@ def main():
     sql = database.SQL()
     for station_name, station_id in stations.items():
         url = weather.get_url(station_id)
-        raw_data = scrape.scrape(url)
+        with Scraper() as scrape_:
+            raw_data = scrape_.scrape(url)
         formatted_data = weather.parse(station_name, raw_data)
         sql.write(table='weather', data=formatted_data, NO_COLUMNS=8)
 

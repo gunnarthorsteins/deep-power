@@ -5,7 +5,7 @@ pwd = os.getcwd()
 sys.path.insert(0, pwd)
 
 from weather import Forecast
-import scrape
+from scrape import Scraper
 import unittest
 
 url = 'https://xmlweather.vedur.is/?op_w=xml&type=forec&lang=en&view=xml&ids=1361&params=F;D;T;N;R&time=1h'
@@ -17,13 +17,17 @@ class TestWeather(unittest.TestCase):
         self.assertIsInstance(forecast_, Forecast)
 
     def test_scrape(self):
-        soup = scrape.scrape(url=url)
+        with Scraper() as scrape_:
+            soup = scrape_.scrape(url=url)
         self.assertIsNotNone(soup)
 
     def test_parse(self):
         forecast_ = Forecast()
-        soup = scrape.scrape(url=url)
-        formatted_forecasts = forecast_.parse(station_name='Grindavík', raw_data=soup)
+        with Scraper() as scrape_:
+            soup = scrape_.scrape(url=url)
+        formatted_forecasts = forecast_.parse(
+            station_name='Grindavík', raw_data=soup
+        )
         self.assertIsNotNone(formatted_forecasts)
 
 

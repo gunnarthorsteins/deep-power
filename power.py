@@ -1,14 +1,9 @@
-import fire
 from datetime import datetime
-import traceback
 import logging
 import json
 
-import requests
-from bs4 import BeautifulSoup
-from mysql.connector.errors import DatabaseError, IntegrityError, ProgrammingError
-
 import database
+from scrape import Scraper
 
 logging.basicConfig(filename='logs.log',
                     level=logging.INFO,
@@ -16,38 +11,15 @@ logging.basicConfig(filename='logs.log',
 
 
 class Landsnet:
-    """Scrapes current regulation value from LN's
-    XML-service and saves to csv and mySQL.
-    """
+    """Scrapes from LN's XML-service.
 
-    def __init__(self):
-        f = open('config.json')
-        self.config = json.load(f)
+    Logs key information on power flow on the Icelandic power grid.
+    """
 
     def get_from_soup(self, val):
         return self.soup.select_one(self.config.css[val])
 
-    def scrape(self):
-        """Scrapes LN's XML-site.
-
-        Returns bs4.element.Tags (see BeautifulSoup documentation):
-            reglun
-            dt
-            pwr
-        """
-        URL = self.config['landsnet']['URL']
-        page = requests.get(URL)
-        soup = BeautifulSoup(page.text, 'lxml')
-
-        
-        # reglun = self.get_from_soup('reglun')
-        # dt = self.get_from_soup('dt')
-        # pwr = self.get_from_soup('pwr')
-        # print(reglun, dt, pwr)
-
-        # return reglun, dt, pwr
-
-    def format(self, reglun, dt, pwr):
+    def parse(self, reglun, dt, pwr):
         """Intermediate data formatting before saving to database."""
 
         strp = r'%Y-%m-%dT%H:%M:%S'
@@ -69,18 +41,17 @@ class Landsnet:
 
 
 def main():
-    try:
-        landsnet = Landsnet()
-        power_data = landsnet.scrape()
-        # sql = database.SQL()
-        # sql.write(power_data)
-
-        # DatabaseError: Usually raised when SQL host is incorrect
-        # ProgrammingError: SQL syntax error
-        # IntegrityError: Duplicate values
-    except (DatabaseError, ProgrammingError, IntegrityError):
-        logging.error(traceback.format_exc())
+    with open('config.json') as f:
+        config = json.load(f)
+    url = config['landsnet']['URL']
+    with Scraper() as scrape_:
+        soup = scrape_.scrape(url)
+    with open("output1.html", "w") as f:
+        f.write(str(soup))
+    landsnet = Landsnet()
+    # sql = database.SQL()
+    # sql.write(power_data)
 
 
 if __name__ == "__main__":
-    fire.Fire(main)
+    main()
