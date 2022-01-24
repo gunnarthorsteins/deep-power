@@ -12,16 +12,19 @@ logging.basicConfig(filename='logs.log',
                     level=logging.INFO,
                     format='%(asctime)s %(message)s')
 
+
 def write_html(filename, soup):
     with open(filename, 'w') as f:
         f.write(soup.prettify())
     print('soup saved to file')
+
 
 def read_html(filename):
     with open(filename) as f:
         soup = BeautifulSoup(f, 'html.parser')
 
     return soup
+
 
 class Landsnet:
     """Scrapes from LN's XML-service.
@@ -42,7 +45,7 @@ class Landsnet:
 
         Returns:
             (pd.DataFrame): The scraped data
-        """        
+        """
 
         literal = json.loads(str(soup))
         return pd.json_normalize(literal)
@@ -54,14 +57,30 @@ class Landsnet:
             val = parsed_data[parsed_data['key'] == key]['MW'].item()
             desired_values.append(val)
         return desired_values
-        
+
     def get_timestamp(self, parsed_data: pd.DataFrame):
-        return parsed_data.iloc[0,0]
+        """Extracts the timestamp from the scraped data.
 
+        Args:
+            parsed_data (pd.DataFrame): The scraped data
 
-    def merge_data(self, desired_values, timestamp):
+        Returns:
+            (str): The extracted timestamp
+        """        
+        return parsed_data.iloc[0, 0]
 
+    def merge_data(self, desired_values: list, timestamp: str):
+        """Merges the data to be written out to SQL
+
+        Args:
+            desired_values (list): The desired values
+            timestamp (str): The timestamp
+
+        Returns:
+            (list): The data prepared for SQL
+        """        
         return [timestamp] + desired_values
+
 
 def main():
     landsnet = Landsnet()
@@ -69,12 +88,8 @@ def main():
         config = json.load(f)
     url = config['landsnet']['URL']
     with Scraper() as scrape_:
-        soup = scrape_.scrape(url)
-    # write_html(filename='landsnet.html', soup=soup)
-    # soup = read_html('landsnet.html')
+        soup = scrape_.scrape(url, 'power')
     parsed_data = landsnet.parse(soup=soup)
-    # parsed_data.to_csv('landsnet.csv', index=False)
-    # parsed_data = pd.read_csv('landsnet.csv')
     desired_values = landsnet.extract_desired_values(parsed_data)
     timestamp = landsnet.get_timestamp(parsed_data)
     final_data = landsnet.merge_data(desired_values, timestamp)

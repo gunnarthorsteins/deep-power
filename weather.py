@@ -124,7 +124,7 @@ def main():
     for station_name, station_id in stations.items():
         url = weather.get_url(station_id)
         with Scraper() as scrape_:
-            raw_data = scrape_.scrape(url)
+            raw_data = scrape_.scrape(url, 'weather')
         formatted_data = weather.parse(station_name, raw_data)
         sql.write(table='weather', data=formatted_data, NO_COLUMNS=8)
 

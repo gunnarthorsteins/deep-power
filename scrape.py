@@ -3,6 +3,7 @@ import logging
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+import traceback
 
 
 class Scraper:
@@ -48,11 +49,12 @@ class Scraper:
 
         return self.session
 
-    def scrape(self, url: str):
+    def scrape(self, url: str, description: str):
         """Scrapes XML-style websites.
 
         Args:   
             url (str): The desired url
+            description (str): The file for writing out logs
 
         Returns:
             (bs4.BeautifulSoup): The query results
@@ -65,12 +67,11 @@ class Scraper:
         if response.status_code == 200:
             return BeautifulSoup(response.content, 'html.parser')
         else:
-            print('hhhh')
-            logging.warning('Scraping failed')
+            logging.warning('scraping failed')
             response.raise_for_status()
 
     def close(self):
         self.session.close()
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, _, exc_value, traceback):
         self.close()

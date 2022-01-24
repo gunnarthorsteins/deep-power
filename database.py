@@ -2,7 +2,8 @@ import mysql.connector
 import os
 import json
 import logging
-from mysql.connector.errors import Error
+from mysql.connector.errors import IntegrityError
+
 
 directory = os.path.dirname(__file__)
 
@@ -68,12 +69,15 @@ class SQL(Setup):
 
         # Execution
         mycursor = self.mydb.cursor()  # A necessary command for every query
-        if is_many:
-            mycursor.executemany(command, data)
-        else:
-            mycursor.execute(command, tuple(data))
-        self.mydb.commit()  # A necessary command for every query
-        logging.info('Success: Logged to database')
+        try:
+            if is_many:
+                mycursor.executemany(command, data)
+            else:
+                mycursor.execute(command, tuple(data))
+            self.mydb.commit()  # A necessary command for every query
+            logging.info('success: logged to database')
+        except IntegrityError:
+            logging.warning('sql execution aborted due to duplicate values')
 
     def fetch(self, table, val):
         mycursor = self.mydb.cursor()
