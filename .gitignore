@@ -1,5 +1,8 @@
+# CUSTOM:
 # SQL config-file (contains passwords)
 config.json
+screenshots/*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

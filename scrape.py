@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import logging
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
@@ -8,6 +9,9 @@ class Scraper:
 
     def __init__(self):
         self.session = requests.Session()
+        logging.basicConfig(filename='logs.log',
+                            level=logging.INFO,
+                            format='%(asctime)s %(message)s')
 
     def __enter__(self):
         return self
@@ -20,7 +24,7 @@ class Scraper:
     ):
         """Improves scraping reliability by retrying.
 
-        Taken from here: https://bit.ly/3Ky7LIZ
+        Adapted from: https://bit.ly/3Ky7LIZ
 
         Args:
             retries (int, optional): Number of retries. Defaults to 3.
@@ -61,6 +65,8 @@ class Scraper:
         if response.status_code == 200:
             return BeautifulSoup(response.content, 'html.parser')
         else:
+            print('hhhh')
+            logging.warning('Scraping failed')
             response.raise_for_status()
 
     def close(self):

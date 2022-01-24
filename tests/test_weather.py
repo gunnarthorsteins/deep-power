@@ -26,7 +26,7 @@ class TestWeather(unittest.TestCase):
         with Scraper() as scrape_:
             soup = scrape_.scrape(url=url)
         formatted_forecasts = forecast_.parse(
-            station_name='Grindavík', raw_data=soup
+            station_name='Grindavík', soup=soup
         )
         self.assertIsNotNone(formatted_forecasts)
 
