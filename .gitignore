@@ -1,6 +1,6 @@
 # CUSTOM:
 # SQL config-file (contains passwords)
-config.json
+sql_conf.json
 screenshots/*
 examples/*
 

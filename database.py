@@ -82,10 +82,10 @@ class SQL(Setup):
                 mycursor.execute(command, tuple(data))
             self.mydb.commit()  # A necessary command for every query
             logging.info(
-                f'{logging_message}: successfully written to database')
+                f'{logging_message}: successfully inserted to database')
         except IntegrityError:
             logging.warning(
-                f'{logging_message}: sql execution aborted due to duplicate values')
+                f'{logging_message}: sql insertion aborted due to duplicate values')
 
     def fetch(self, table, val):
         mycursor = self.mydb.cursor()

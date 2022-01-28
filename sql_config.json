@@ -1,0 +1,13 @@
+{
+        "HOST": "localhost",
+        "USER": "root",
+        "PASSWD": "goldman.2021",
+        "DATABASE": "iceland",
+        "tables": [
+            "landsnet",
+            "weather"
+        ],
+        "columns": [
+            "timestamp"
+        ]
+    }
