@@ -3,12 +3,15 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import json
 import logging
+import os
 import pandas as pd
 
 import database
 from scrape import Scraper
 
-logging.basicConfig(filename='logs.log',
+cwd = os.getcwd() + '/'
+
+logging.basicConfig(filename=f'{cwd}logs.log',
                     level=logging.INFO,
                     format='%(asctime)s %(message)s')
 
@@ -33,7 +36,7 @@ class Landsnet:
     """
 
     def __init__(self):
-        with open('config.json') as f:
+        with open(f'{cwd}config.json') as f:
             self.config = json.load(f)
         self.parameters = self.config['landsnet']['parameters']
 
@@ -83,12 +86,12 @@ class Landsnet:
 
 
 def main():
-    landsnet = Landsnet()
-    with open('config.json') as f:
+    with open(f'{cwd}config.json') as f:
         config = json.load(f)
     url = config['landsnet']['URL']
     with Scraper() as scrape_:
         soup = scrape_.scrape(url, 'power')
+    landsnet = Landsnet()
     parsed_data = landsnet.parse(soup=soup)
     desired_values = landsnet.extract_desired_values(parsed_data)
     timestamp = landsnet.get_timestamp(parsed_data)

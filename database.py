@@ -5,16 +5,16 @@ import logging
 from mysql.connector.errors import IntegrityError
 
 
-directory = os.path.dirname(__file__)
+cwd = os.path.dirname(__file__)
 
 
 class Setup():
     def __init__(self):
-        logging.basicConfig(filename='logs.log',
+        logging.basicConfig(filename=f'{cwd}logs.log',
                             level=logging.INFO,
                             format='%(asctime)s %(message)s')
 
-        f = open('config.json')
+        f = open(f'{cwd}config.json')
         self.config = json.load(f)
 
         self.mydb = mysql.connector.connect(host=self.config['sql']['HOST'],

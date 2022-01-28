@@ -1,9 +1,14 @@
+#!/usr/bin/python
+
 import bs4
 import json
 import logging
+import os
 
 import database
 from scrape import Scraper
+
+cwd = os.path.dirname(__file__)
 
 
 class Forecast:
@@ -20,11 +25,11 @@ class Forecast:
     """
 
     def __init__(self):
-        logging.basicConfig(filename='logs.log',
+        logging.basicConfig(filename=f'{cwd}/logs.log',
                             level=logging.INFO,
                             format='%(asctime)s %(message)s')
 
-        with open('config.json') as f:
+        with open(f'{cwd}/config.json') as f:
             self.config = json.load(f)
         self.parameters = self.config['met']['parameters']
 
@@ -116,7 +121,7 @@ class Forecast:
 
 
 def main():
-    with open('config.json') as f:
+    with open(f'{cwd}/config.json') as f:
         config = json.load(f)
     stations = config["met"]["stations"]
     weather = Forecast()
