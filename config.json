@@ -1,0 +1,66 @@
+{
+    "landsnet": {
+        "URL": "https://amper.landsnet.is/MapData/api/measurements",
+        "parameters": {
+            "time": "datetime",
+            "MW": "float",
+            "key": "varchar(30)",
+            "substation": "varchar(30)",
+            "devicetype": "varchar(30)",
+            "good": "int",
+            "replaced": "int",
+            "stop": "int"
+        },
+        "keys": [
+            "FL2",
+            "FL3",
+            "FL4",
+            "ÍS1",
+            "ÍS2",
+            "NÁ1",
+            "NÁ2",
+            "JÁ1",
+            "TOTAL_POWER_FLOW",
+            "REGULATING_POWER"
+        ]
+    },
+    "met": {
+        "stations": {
+            "Grindavík": 1361,
+            "Vestmannaeyjar": 6015,
+            "Hafnarfjörður": 31475,
+            "Keflavík": 990
+        },
+        "parameters": {
+            "station": "varchar(30)",
+            "atime": "datetime",
+            "ftime": "datetime",
+            "f": "float",
+            "d": "float",
+            "t": "float",
+            "n": "int",
+            "r": "float"
+        },
+        "url_prefix": "https://xmlweather.vedur.is/?op_w=xml&type=forec&lang=en&view=xml&ids=",
+        "url_appendix": "&params=F;D;T;N;R&time=1h"
+    },
+    "wind_directions": {
+        "S": 180,
+        "SSW": 202.5,
+        "SW": 225,
+        "WSW": 247.5,
+        "W": 270,
+        "WNW": 292.5,
+        "NW": 315,
+        "NNW": 337.5,
+        "N": 0,
+        "NNE": 22.5,
+        "NE": 45,
+        "ENE": 67.5,
+        "E": 90,
+        "ESE": 112.5,
+        "SE": 135,
+        "SSE": 157.5,
+        "Calm": 1000
+    }
+}

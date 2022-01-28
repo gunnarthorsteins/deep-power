@@ -14,13 +14,13 @@ class Setup():
                             level=logging.INFO,
                             format='%(asctime)s %(message)s')
 
-        f = open(f'{cwd}/config.json')
+        f = open(f'{cwd}/sql_config.json')
         self.config = json.load(f)
 
-        self.mydb = mysql.connector.connect(host=self.config['sql']['HOST'],
-                                            user=self.config['sql']['USER'],
-                                            passwd=self.config['sql']['PASSWD'],
-                                            database=self.config['sql']['DATABASE'])
+        self.mydb = mysql.connector.connect(host=self.config['HOST'],
+                                            user=self.config['USER'],
+                                            passwd=self.config['PASSWD'],
+                                            database=self.config['DATABASE'])
 
 
 class Create(Setup):
