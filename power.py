@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import bs4
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -9,9 +11,9 @@ import pandas as pd
 import database
 from scrape import Scraper
 
-cwd = os.getcwd() + '/'
+cwd = os.path.dirname(os.path.realpath(__file__))
 
-logging.basicConfig(filename=f'{cwd}logs.log',
+logging.basicConfig(filename=f'{cwd}/logs.log',
                     level=logging.INFO,
                     format='%(asctime)s %(message)s')
 
@@ -36,7 +38,7 @@ class Landsnet:
     """
 
     def __init__(self):
-        with open(f'{cwd}config.json') as f:
+        with open(f'{cwd}/config.json') as f:
             self.config = json.load(f)
         self.parameters = self.config['landsnet']['parameters']
 
@@ -69,7 +71,7 @@ class Landsnet:
 
         Returns:
             (str): The extracted timestamp
-        """        
+        """
         return parsed_data.iloc[0, 0]
 
     def merge_data(self, desired_values: list, timestamp: str):
@@ -81,12 +83,12 @@ class Landsnet:
 
         Returns:
             (list): The data prepared for SQL
-        """        
+        """
         return [timestamp] + desired_values
 
 
 def main():
-    with open(f'{cwd}config.json') as f:
+    with open(f'{cwd}/config.json') as f:
         config = json.load(f)
     url = config['landsnet']['URL']
     with Scraper() as scrape_:

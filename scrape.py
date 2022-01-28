@@ -19,9 +19,9 @@ class Scraper:
 
     def _requests_retry_session(
         self,
-        retries=3,
+        retries=5,
         backoff_factor=0.3,
-        status_forcelist=(500, 502, 504),
+        status_forcelist=(500, 502, 504, 522),
     ):
         """Improves scraping reliability by retrying.
 
@@ -31,8 +31,7 @@ class Scraper:
             retries (int, optional): Number of retries. Defaults to 3.
             backoff_factor (float, optional): The amount of time to wait after a failed attempt.
                 Defaults to 0.3.
-            status_forcelist (tuple, optional): The exceptions to handle.
-                Defaults to (500, 502, 504).
+            status_forcelist (tuple, optional): The Error Codes to retry after failing on
 
         Returns:
             (requests.sessions.Session): The requests session
@@ -63,7 +62,7 @@ class Scraper:
             requests.exceptions.ConnectionError: If connection isn't made
         """
 
-        response = self._requests_retry_session().get(url)
+        response = self._requests_retry_session().get(url, timeout=5)
         if response.status_code == 200:
             return BeautifulSoup(response.content, 'html.parser')
         else:

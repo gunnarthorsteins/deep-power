@@ -8,7 +8,7 @@ import os
 import database
 from scrape import Scraper
 
-cwd = os.path.dirname(__file__)
+cwd = os.path.dirname(os.path.realpath(__file__))
 
 
 class Forecast:
