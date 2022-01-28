@@ -23,8 +23,8 @@ class TestWeather(unittest.TestCase):
 
     def test_parse(self):
         forecast_ = Forecast()
-        with Scraper() as scrape_:
-            soup = scrape_.scrape(url=url)
+        with Scraper() as scraper_:
+            soup = scraper_.scrape(url=url)
         formatted_forecasts = forecast_.parse(
             station_name='Grindavík', soup=soup
         )

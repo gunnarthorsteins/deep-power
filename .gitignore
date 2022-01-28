@@ -2,6 +2,7 @@
 # SQL config-file (contains passwords)
 config.json
 screenshots/*
+examples/*
 
 
 # Byte-compiled / optimized / DLL files

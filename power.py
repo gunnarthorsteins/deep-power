@@ -91,15 +91,16 @@ def main():
     with open(f'{cwd}/config.json') as f:
         config = json.load(f)
     url = config['landsnet']['URL']
-    with Scraper() as scrape_:
-        soup = scrape_.scrape(url, 'power')
+    logging_message = 'power'
+    with Scraper() as scraper_:
+        soup = scraper_.scrape(url, description=logging_message)
     landsnet = Landsnet()
     parsed_data = landsnet.parse(soup=soup)
     desired_values = landsnet.extract_desired_values(parsed_data)
     timestamp = landsnet.get_timestamp(parsed_data)
     final_data = landsnet.merge_data(desired_values, timestamp)
     sql = database.SQL()
-    sql.write(table='landsnet', data=final_data, NO_COLUMNS=11, is_many=False)
+    sql.write(table='landsnet', data=final_data, logging_message='power')
 
 
 if __name__ == "__main__":

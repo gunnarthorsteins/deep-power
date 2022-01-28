@@ -126,12 +126,14 @@ def main():
     stations = config["met"]["stations"]
     weather = Forecast()
     sql = database.SQL()
+    logging_message = 'weather'
     for station_name, station_id in stations.items():
         url = weather.get_url(station_id)
-        with Scraper() as scrape_:
-            raw_data = scrape_.scrape(url, 'weather')
+        with Scraper() as scraper_:
+            raw_data = scraper_.scrape(url=url, description=logging_message)
         formatted_data = weather.parse(station_name, raw_data)
-        sql.write(table='weather', data=formatted_data, NO_COLUMNS=8)
+        sql.write(table='weather', data=formatted_data,
+                  logging_message=logging_message)
 
 
 if __name__ == '__main__':

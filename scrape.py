@@ -19,7 +19,7 @@ class Scraper:
 
     def _requests_retry_session(
         self,
-        retries=5,
+        retries=8,
         backoff_factor=0.3,
         status_forcelist=(500, 502, 504, 522),
     ):
@@ -31,7 +31,8 @@ class Scraper:
             retries (int, optional): Number of retries. Defaults to 3.
             backoff_factor (float, optional): The amount of time to wait after a failed attempt.
                 Defaults to 0.3.
-            status_forcelist (tuple, optional): The Error Codes to retry after failing on
+            status_forcelist (tuple, optional): The Error Codes to retry after failing on.
+                Note: Landsnet typically failes on 522.
 
         Returns:
             (requests.sessions.Session): The requests session
@@ -66,10 +67,11 @@ class Scraper:
         if response.status_code == 200:
             return BeautifulSoup(response.content, 'html.parser')
         else:
-            logging.warning('scraping failed')
+            logging.warning(f'{description}: scraping failed')
             response.raise_for_status()
 
     def close(self):
+        """Ensures session is closed, incl. when an exception is raised."""
         self.session.close()
 
     def __exit__(self, _, exc_value, traceback):

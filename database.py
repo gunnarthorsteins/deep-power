@@ -51,17 +51,23 @@ class SQL(Setup):
     def __init__(self):
         super().__init__()
 
-    def write(self, table: str, data: list, NO_COLUMNS: int, is_many=True):
+    def write(self, table: str, data: list, logging_message: str):
         '''Writes data to MySQL table.
 
         Args:
             table: table name
             data: data to be written out. Format is list or nested tuples
                 in list if writing multiple lines
-            NO_COLUMNS: Number of columns in table. This is dumb but cannot
-                be bothered with it for now
-            is_many: Whether we're writing multiple lines. Defaults to True
+            logging_message: The filename to include in the logging message
         '''
+
+        # Implicitly handle both single-line and multi-line inputs
+        if type(data[0]) is tuple:
+            NO_ENTRIES = len(data)
+            NO_COLUMNS = len(data[0])
+        else:
+            NO_ENTRIES = 0
+            NO_COLUMNS = len(data)
 
         # Setup
         types = str(NO_COLUMNS * f'%s,')[:-1]  # Formatting value types
@@ -70,14 +76,16 @@ class SQL(Setup):
         # Execution
         mycursor = self.mydb.cursor()  # A necessary command for every query
         try:
-            if is_many:
+            if NO_ENTRIES > 1:
                 mycursor.executemany(command, data)
             else:
                 mycursor.execute(command, tuple(data))
             self.mydb.commit()  # A necessary command for every query
-            logging.info('success: logged to database')
+            logging.info(
+                f'{logging_message}: successfully written to database')
         except IntegrityError:
-            logging.warning('sql execution aborted due to duplicate values')
+            logging.warning(
+                f'{logging_message}: sql execution aborted due to duplicate values')
 
     def fetch(self, table, val):
         mycursor = self.mydb.cursor()
