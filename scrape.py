@@ -19,8 +19,8 @@ class Scraper:
 
     def _requests_retry_session(
         self,
-        retries=8,
-        backoff_factor=0.3,
+        retries=10,
+        backoff_factor=0.5,
         status_forcelist=(500, 502, 504, 522),
     ):
         """Improves scraping reliability by retrying.
