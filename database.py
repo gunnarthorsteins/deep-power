@@ -14,8 +14,8 @@ class Setup():
                             level=logging.INFO,
                             format='%(asctime)s %(message)s')
 
-        f = open(f'{cwd}/sql_config.json')
-        self.config = json.load(f)
+        with open(f'{cwd}/sql_config.json') as f:
+            self.config = json.load(f)
 
         self.mydb = mysql.connector.connect(host=self.config['HOST'],
                                             user=self.config['USER'],
@@ -85,7 +85,7 @@ class SQL(Setup):
                 f'{logging_message}: successfully inserted to database')
         except IntegrityError:
             logging.warning(
-                f'{logging_message}: sql insertion aborted due to duplicate values')
+                f'{logging_message}: SQL insertion aborted due to duplicate primary keys')
 
     def fetch(self, table, val):
         mycursor = self.mydb.cursor()
