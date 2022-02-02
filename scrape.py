@@ -28,11 +28,11 @@ class Scraper:
         Adapted from: https://bit.ly/3Ky7LIZ
 
         Args:
-            retries (int, optional): Number of retries. Defaults to 3.
+            retries (int, optional): Number of retries. Defaults to 10.
             backoff_factor (float, optional): The amount of time to wait after a failed attempt.
-                Defaults to 0.3.
+                Defaults to 0.5.
             status_forcelist (tuple, optional): The Error Codes to retry after failing on.
-                Note: Landsnet typically failes on 522.
+                Note: Landsnet typically fails on 522.
 
         Returns:
             (requests.sessions.Session): The requests session
